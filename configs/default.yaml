@@ -1,0 +1,46 @@
+# Default configuration for pneumonia detection experiments
+
+data:
+  root_dir: "data/chest_xray"
+  image_size: 224
+  val_split: 0.15  # fraction of train used for validation
+  num_workers: 4
+  pin_memory: true
+
+training:
+  batch_size: 32
+  num_epochs: 15
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  scheduler: "cosine"
+  early_stopping_patience: 5
+
+augmentation:
+  # "none", "basic", "standard", "heavy"
+  level: "standard"
+  # Standard augmentation params
+  horizontal_flip_p: 0.5
+  rotation_degrees: 15
+  brightness: 0.2
+  contrast: 0.2
+  random_crop_scale: [0.85, 1.0]
+
+model:
+  # "logistic_regression", "shallow_cnn", "resnet18_finetune", "densenet_attention"
+  name: "densenet_attention"
+  pretrained: true
+  dropout: 0.3
+  use_attention: true
+  use_focal_loss: true
+  focal_loss_gamma: 2.0
+  focal_loss_alpha: 0.6  # weight for pneumonia class
+
+evaluation:
+  grad_cam: true
+  num_grad_cam_samples: 16
+  confidence_threshold: 0.5
+
+reproducibility:
+  seed: 42
+  seeds_for_multiple_runs: [42, 123, 456, 789, 1024]
+  deterministic: true
