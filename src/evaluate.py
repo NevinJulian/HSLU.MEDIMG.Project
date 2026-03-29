@@ -178,17 +178,16 @@ def generate_gradcam(model, images, target_layer, device):
     Returns numpy array of heatmaps with shape (B, H, W).
     """
     model.eval()
-    images = images.to(device)
-    images.requires_grad_(True)
+    images = images.clone().to(device).requires_grad_(True)
 
     activations = []
     gradients = []
 
     def forward_hook(module, input, output):
-        activations.append(output.detach())
+        activations.append(output.clone())
 
     def backward_hook(module, grad_input, grad_output):
-        gradients.append(grad_output[0].detach())
+        gradients.append(grad_output[0].clone())
 
     handle_fwd = target_layer.register_forward_hook(forward_hook)
     handle_bwd = target_layer.register_full_backward_hook(backward_hook)
@@ -198,8 +197,7 @@ def generate_gradcam(model, images, target_layer, device):
         output = output.unsqueeze(0)
 
     model.zero_grad()
-    target = torch.sigmoid(output)
-    target.sum().backward()
+    output.sum().backward()
 
     handle_fwd.remove()
     handle_bwd.remove()
@@ -215,7 +213,7 @@ def generate_gradcam(model, images, target_layer, device):
     cam_max = cam.flatten(1).max(dim=1).values.view(-1, 1, 1)
     cam = (cam - cam_min) / (cam_max - cam_min + 1e-8)
 
-    return cam.cpu().numpy()
+    return cam.detach().cpu().numpy()
 
 
 def plot_gradcam_grid(images, heatmaps, labels, predictions, n_samples=8):

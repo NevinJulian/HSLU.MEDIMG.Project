@@ -103,7 +103,7 @@ def _get_albumentations_transforms(level: str, size: int):
         ])
     elif level == "standard":
         train_transform = A.Compose([
-            A.RandomResizedCrop(size, size, scale=(0.85, 1.0)),
+            A.RandomResizedCrop(size=(size, size), scale=(0.85, 1.0)),
             A.HorizontalFlip(p=0.5),
             A.Rotate(limit=15, p=0.4),
             A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.4),
@@ -113,7 +113,7 @@ def _get_albumentations_transforms(level: str, size: int):
         ])
     elif level == "heavy":
         train_transform = A.Compose([
-            A.RandomResizedCrop(size, size, scale=(0.8, 1.0)),
+            A.RandomResizedCrop(size=(size, size), scale=(0.8, 1.0)),
             A.HorizontalFlip(p=0.5),
             A.Rotate(limit=20, p=0.5),
             A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),

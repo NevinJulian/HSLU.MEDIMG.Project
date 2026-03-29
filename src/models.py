@@ -86,7 +86,7 @@ class DenseNetAttention(nn.Module):
 
     def forward(self, x):
         features = self.backbone(x)
-        features = F.relu(features, inplace=True)
+        features = F.relu(features)
 
         if self.use_attention:
             features = self.attention(features)
@@ -98,7 +98,7 @@ class DenseNetAttention(nn.Module):
     def get_feature_maps(self, x):
         """Return feature maps before pooling (for Grad-CAM)."""
         features = self.backbone(x)
-        features = F.relu(features, inplace=True)
+        features = F.relu(features)
         if self.use_attention:
             features = self.attention(features)
         return features
