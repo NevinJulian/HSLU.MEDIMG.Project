@@ -34,3 +34,5 @@ results/*.json
 .DS_Store
 Thumbs.db
 
+# Model files
+*.pt
