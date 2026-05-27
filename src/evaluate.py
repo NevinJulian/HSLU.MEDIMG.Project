@@ -219,7 +219,7 @@ def generate_gradcam(model, images, target_layer, device):
 def plot_gradcam_grid(images, heatmaps, labels, predictions, n_samples=8):
     """Plot a grid of images with Grad-CAM overlays."""
     n = min(n_samples, len(images))
-    fig, axes = plt.subplots(2, n, figsize=(2.5 * n, 5))
+    fig, axes = plt.subplots(2, n, figsize=(2.5 * n, 5), squeeze=False)
 
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
