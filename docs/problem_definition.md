@@ -53,3 +53,52 @@ This dataset is relevant because:
 - **No severity grading**: Binary labels do not capture disease severity
 - **Mixed pneumonia types**: Bacterial and viral pneumonia are grouped together
 - **Image quality variation**: Some images have artifacts or suboptimal exposure
+
+## Bias Investigation
+
+In response to midterm feedback, we explicitly investigate whether the data
+collection process introduces shortcuts that the model could exploit instead
+of learning real pathology features. The full analysis is in
+`notebooks/01_data_exploration.ipynb` (sections 5 and 6); the headline checks
+are summarized here.
+
+### 1. Class-stratified image dimensions
+
+The dataset combines images from potentially different scanners and acquisition
+settings. If NORMAL and PNEUMONIA images have systematically different sizes
+or aspect ratios, the model can shortcut on dimensions instead of lung
+anatomy. We therefore plot width / height / aspect-ratio distributions
+**stratified by class** (not just overall, as in the original midterm version)
+and report Cohen's d to quantify how separable the two classes are by
+dimension alone.
+
+- **Mitigation in place**: `src/data.py` resizes every image to a fixed shape
+  (224×224 by default) before training. Image dimensions are therefore not
+  directly visible to any model.
+- **Residual risk**: pixel-level artifacts that survive a resize (border
+  markings, exposure differences, sensor noise patterns) can still leak the
+  acquisition source. Cohen's d values reported in notebook 01 should be
+  cited in the final presentation's limitations slide.
+
+### 2. Filename pattern leakage
+
+NORMAL and PNEUMONIA images follow distinct filename conventions:
+
+- NORMAL files: `IM-XXXX-XXXX.jpeg`
+- PNEUMONIA files: `personN_bacteria_M.jpeg` or `personN_virus_M.jpeg`
+
+The model never sees filenames, so this is not direct leakage. It is, however,
+a clear signal that the two classes were collected through different pipelines.
+We compute a "filename-only classifier" accuracy in notebook 01: if filenames
+alone reach near-perfect accuracy, *something* in the acquisition process
+correlates with the label, and any artifact that survives the resize is a
+potential shortcut.
+
+### 3. Random / trivial baselines
+
+We compare every learned model against three non-learning baselines (majority
+class, stratified random, uniform random) in `notebooks/02_baseline_experiments.ipynb`
+section 6. Any deep model that fails to beat these on F1-macro or NPV is not
+actually learning anything useful — this is the floor against which the
+sensitivity-saturated outputs of the imbalanced training regime should be
+judged.
